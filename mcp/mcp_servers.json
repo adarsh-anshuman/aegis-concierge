@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "google-developer-knowledge": {
+      "command": "npx",
+      "args": ["-y", "@google/developer-knowledge-mcp"],
+      "env": {
+        "COMPLIANCE_MODE": "STRICT",
+        "LOCAL_CACHE_DIR": "./cache/mcp_docs/"
+      }
+    }
+  }
+}
