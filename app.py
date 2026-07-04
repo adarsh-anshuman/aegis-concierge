@@ -1,5 +1,6 @@
 import time
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from rich.console import Console
 from rich.panel import Panel
@@ -14,6 +15,10 @@ from utils.audit_logger import log_audit_record
 
 app = FastAPI(title="Aegis Concierge API")
 console = Console()
+
+@app.get("/", include_in_schema=False)
+async def home():
+    return RedirectResponse(url="/docs")
 
 threat_scanner = ThreatScanner()
 pii_masker = PIIMasker()
