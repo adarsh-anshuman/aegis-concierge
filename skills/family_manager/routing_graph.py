@@ -1,3 +1,4 @@
+import os
 import sys
 import asyncio
 from pathlib import Path
@@ -60,8 +61,13 @@ class RoutingGraph:
         if self._is_mutation_task(prompt) or ctx.get("security_hitl"):
             if not ctx.get("human_approved", False):
                 console.print(Panel("[bold red]SECURITY HALT: Developer Task requires human approval.[/bold red]", border_style="red"))
-                # Use to_thread to prevent blocking Uvicorn's event loop while waiting for CLI input
-                approved = await asyncio.to_thread(Confirm.ask, "Do you approve this technical execution?")
+                # Headless Deployment Fix for Render: Bypass interactive prompts
+                if os.getenv("RENDER") == "true" or not sys.stdin.isatty():
+                    console.print("[bold yellow]Headless mode detected. Auto-rejecting HITL prompt.[/bold yellow]")
+                    approved = False
+                else:
+                    # Use to_thread to prevent blocking Uvicorn's event loop while waiting for CLI input
+                    approved = await asyncio.to_thread(Confirm.ask, "Do you approve this technical execution?")
                 if approved:
                     ctx["human_approved"] = True
                     console.print("[bold green]Execution Approved by Developer.[/bold green]")
@@ -85,7 +91,12 @@ class RoutingGraph:
         if self._is_mutation_task(prompt) or ctx.get("security_hitl"):
             if not ctx.get("human_approved", False):
                 console.print(Panel("[bold red]SECURITY HALT: Lifestyle Task requires human approval.[/bold red]", border_style="red"))
-                approved = await asyncio.to_thread(Confirm.ask, "Do you approve this action?")
+                
+                if os.getenv("RENDER") == "true" or not sys.stdin.isatty():
+                    console.print("[bold yellow]Headless mode detected. Auto-rejecting HITL prompt.[/bold yellow]")
+                    approved = False
+                else:
+                    approved = await asyncio.to_thread(Confirm.ask, "Do you approve this action?")
                 if approved:
                     ctx["human_approved"] = True
                     console.print("[bold green]Execution Approved by User.[/bold green]")
